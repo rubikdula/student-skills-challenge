@@ -1,0 +1,14 @@
+C:\programim\student-skills-challenge\StudentSkillsChallenge\bin\Debug\net8.0\StudentSkillsChallenge.exe
+C:\programim\student-skills-challenge\StudentSkillsChallenge\bin\Debug\net8.0\StudentSkillsChallenge.deps.json
+C:\programim\student-skills-challenge\StudentSkillsChallenge\bin\Debug\net8.0\StudentSkillsChallenge.runtimeconfig.json
+C:\programim\student-skills-challenge\StudentSkillsChallenge\bin\Debug\net8.0\StudentSkillsChallenge.dll
+C:\programim\student-skills-challenge\StudentSkillsChallenge\bin\Debug\net8.0\StudentSkillsChallenge.pdb
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.GeneratedMSBuildEditorConfig.editorconfig
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.AssemblyInfoInputs.cache
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.AssemblyInfo.cs
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.csproj.CoreCompileInputs.cache
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.dll
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\refint\StudentSkillsChallenge.dll
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.pdb
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.genruntimeconfig.cache
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\ref\StudentSkillsChallenge.dll
