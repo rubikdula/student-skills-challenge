@@ -14,9 +14,9 @@ A C# Console Application designed to manage, calculate, and rank scoring data fo
   - Support for "Single-Event Entry" (participants who only compete in 1 event).
 
 ## BTEC Target Criteria Tracker
-- [ ] 4/B.P4: Comprehensive program design (Data structures, OOP architecture)
-- [ ] 4/B.M2: Justification of design decisions (Why specific collections/approaches were used)
-- [ ] 4/C.P6: Working, robust implementation meeting all client needs
+- [x] 4/B.P4: Comprehensive program design (Data structures, OOP architecture)
+- [x] 4/B.M2: Justification of design decisions (Why specific collections/approaches were used)
+- [x] 4/C.P6: Working, robust implementation meeting all client needs
 - [ ] 4/C.M3: Code optimization for efficiency and performance
 - [ ] 4/BC.D2: Evaluation of final application against the client brief
 
@@ -83,9 +83,17 @@ Backing collections are `private readonly List<T>` fields. Public properties exp
   - [x] Event definition (tagging events as Team or Individual)
   - [x] Placement recording with duplicate prevention and auto points
   - [x] Team + Individual leaderboard queries
-- [ ] **Phase 3: Presentation Layer**
-  - [ ] Main text-menu navigation loop (`ConsoleUI`)
-  - [ ] Formatted scoreboard layouts
+- [x] **Phase 3: Leaderboard & Rankings**
+  - [x] `LeaderboardService` — individual + team leaderboards with 1-2-2-4 ranking
+  - [x] Event-specific results view (dynamic Team/Individual branching)
+  - [x] Single-event entry handled naturally (TotalPoints Sum, no special case)
+  - [x] All output as formatted strings — zero Console.WriteLine in service layer
+- [x] **Phase 4: Presentation Layer — COMPLETE**
+  - [x] `ConsoleUI` in `UI/` — full 10-option menu loop
+  - [x] Input validation via `ReadInt` / `ReadString` (no crash paths)
+  - [x] Colour-coded result feedback (green ✓ / red ✗)
+  - [x] Option 9 mock data seed (ties, single-event entries, full rosters)
+  - [x] `Program.cs` wired — single `ui.Run()` entry point
 - [ ] **Phase 4: Presentation Layer**
   - [ ] Main text-menu navigation loop
   - [ ] Formatted scoreboard layouts
@@ -126,6 +134,70 @@ No special code path. `TotalPoints` on both `Competitor` and `Team` is `placemen
 | Placement recording blocked for incomplete teams (< 5 members) | Brief mandates *exactly* 5 members per team. `Team.IsComplete` must be `true` before a team result is meaningful. Intentional — no change required. |
 | Team members excluded from individual leaderboard | Team members score through their team's placements only. Prevents double-counting on both leaderboards. |
 | Duplicate placement returns `(false, message)` not exception | User error, not programming error. UI layer handles the message without try/catch. |
+
+---
+
+## Leaderboard Service (`Services/LeaderboardService.cs`)
+
+### Architecture
+Depends on `TournamentManager` (injected via constructor). Reads live data on every call — no caching. Returns `string` from every public method; never calls `Console.WriteLine`.
+
+### Public Methods
+
+| Method | Returns | Purpose |
+|---|---|---|
+| `FormatIndividualLeaderboard()` | `string` | Sorted individual standings with 1-2-2-4 ranks |
+| `FormatTeamLeaderboard()` | `string` | Sorted team standings with 1-2-2-4 ranks |
+| `FormatEventResults(int eventId)` | `string` | Single-event placements; branches on Team vs Individual type |
+
+### Ranking Algorithm — Standard Competition Ranking (1-2-2-4)
+Implemented in `Apply1224Ranking(IReadOnlyList<int> sortedPointsDescending)`.
+
+**Key insight:** Two cursors (`i` = group start, `j` = group end). All tied entries get rank `i + 1` (1-based). Outer cursor jumps to `j` after each group, which skips the positions consumed by the tie — producing the characteristic gap (two 2nds → next is 4th, not 3rd).
+
+```
+scores = [10, 8, 8, 5]
+ranks  = [ 1, 2, 2, 4]   ← no rank 3 because two people share rank 2
+```
+
+Full pseudocode and worked example in the XML doc block above the method in source.
+
+### Single-Event Entry Handling
+No special code path. `Competitor.TotalPoints` and `Team.TotalPoints` both delegate to `placements.Sum(p => p.PointsAwarded)`. One placement → one value. Zero placements → 0. Both cases appear on the leaderboard naturally at their earned point total.
+
+---
+
+## Presentation Layer (`UI/ConsoleUI.cs`)
+
+### Menu Options
+| Option | Action | Guard |
+|---|---|---|
+| 1 | Register Team | 4-team cap via TournamentManager |
+| 2 | Add Team Member | 5-member cap via TournamentManager |
+| 3 | Register Individual | 20-individual cap via TournamentManager |
+| 4 | Create Event | 5-event cap; type + category selection |
+| 5 | Record Placement | Event-type branch; incomplete-team UI guard |
+| 6 | View Individual Leaderboard | Calls `LeaderboardService.FormatIndividualLeaderboard()` |
+| 7 | View Team Leaderboard | Calls `LeaderboardService.FormatTeamLeaderboard()` |
+| 8 | View Event Results | Calls `LeaderboardService.FormatEventResults(id)` |
+| 9 | Seed Mock Data | Full tournament state; ties + single-event entries |
+| 10 | Exit | Returns from `Run()` |
+
+### Input Validation Pattern
+Two static helpers cover all user input:
+
+- `ReadInt(prompt, min, max)` — loops until `int.TryParse` succeeds AND value is in range. Zero paths to exception.
+- `ReadString(prompt)` — loops until input is non-null and non-whitespace. Trims before returning.
+
+Both helpers are `private static` — they have no side effects and need no instance state.
+
+### Entry Point (`Program.cs`)
+```csharp
+var manager     = new TournamentManager();
+var leaderboard = new LeaderboardService(manager);
+var ui          = new ConsoleUI(manager, leaderboard);
+ui.Run();
+```
 
 ---
 

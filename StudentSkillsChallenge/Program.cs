@@ -1,15 +1,21 @@
-﻿namespace StudentSkillsChallenge;
+using StudentSkillsChallenge.Services;
+using StudentSkillsChallenge.UI;
 
-// ─── Entry point ─────────────────────────────────────────────────────────────
-// Phase 1 (current): Domain models only — no business logic or UI yet.
-// Phase 2 will introduce TournamentManager (registration + scoring logic).
-// Phase 3 will introduce the ConsoleUI menu loop.
-// ─────────────────────────────────────────────────────────────────────────────
+namespace StudentSkillsChallenge;
+
+// ─── Entry point ──────────────────────────────────────────────────────────────
+// Compose the three service objects and hand control to the UI loop.
+// All tournament data lives in TournamentManager; LeaderboardService reads it;
+// ConsoleUI owns all console I/O and drives the interaction.
+// ──────────────────────────────────────────────────────────────────────────────
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Student Skills Challenge — v0.1 (models scaffold)");
-        Console.WriteLine("Full menu system coming in Phase 2.");
+        var manager     = new TournamentManager();
+        var leaderboard = new LeaderboardService(manager);
+        var ui          = new ConsoleUI(manager, leaderboard);
+
+        ui.Run();
     }
 }
