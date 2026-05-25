@@ -77,16 +77,55 @@ Backing collections are `private readonly List<T>` fields. Public properties exp
   - [x] Implement robust validation properties (team size, event count, placement guards)
   - [x] `EventType` enum for compile-safe Team/Individual branching
   - [x] Points distribution table documented and justified
-- [ ] **Phase 2: Registration & System Management**
-  - [ ] `TournamentManager` service class (owns all lists, enforces global caps)
-  - [ ] Team and Individual registration flow
-  - [ ] Event definition (tagging events as Team or Individual)
-- [ ] **Phase 3: Scoring & Business Logic**
-  - [ ] Record placements via TournamentManager
-  - [ ] Aggregate leaderboards (separate Team and Individual)
+- [x] **Phase 2: Registration & System Management**
+  - [x] `TournamentManager` service class (owns all lists, enforces global caps)
+  - [x] Team and Individual registration flow
+  - [x] Event definition (tagging events as Team or Individual)
+  - [x] Placement recording with duplicate prevention and auto points
+  - [x] Team + Individual leaderboard queries
+- [ ] **Phase 3: Presentation Layer**
+  - [ ] Main text-menu navigation loop (`ConsoleUI`)
+  - [ ] Formatted scoreboard layouts
 - [ ] **Phase 4: Presentation Layer**
   - [ ] Main text-menu navigation loop
   - [ ] Formatted scoreboard layouts
+
+---
+
+## Service Layer — TournamentManager (`Services/TournamentManager.cs`)
+
+### Architecture
+`TournamentManager` is the sole owner of all runtime data. UI layer calls its methods; it never exposes mutable collections. Result tuples `(bool Success, string Message, T? Data)` carry outcomes back to the UI without requiring try/catch at the menu level.
+
+### Public Methods
+
+| Method | Returns | Purpose |
+|---|---|---|
+| `RegisterTeam(name)` | `(bool, string, Team?)` | Create team; enforce ≤4 cap |
+| `AddTeamMember(teamId, name)` | `(bool, string, Competitor?)` | Add member; enforce ≤5 per team |
+| `RegisterIndividual(name)` | `(bool, string, Competitor?)` | Register standalone competitor; enforce ≤20 cap |
+| `AddEvent(name, type, category)` | `(bool, string, TournamentEvent?)` | Define event; enforce ≤5 cap; block duplicate names |
+| `RecordTeamPlacement(teamId, eventId, rank)` | `(bool, string, Placement?)` | Log team result; auto-calculate points; block duplicates |
+| `RecordIndividualPlacement(competitorId, eventId, rank)` | `(bool, string, Placement?)` | Log individual result; auto-calculate points; block duplicates; block team members |
+| `GetTeamLeaderboard()` | `IReadOnlyList<Team>` | Teams sorted by TotalPoints desc |
+| `GetIndividualLeaderboard()` | `IReadOnlyList<Competitor>` | Standalone competitors sorted by TotalPoints desc |
+
+### Read-Only Properties
+`Teams`, `Competitors`, `Individuals`, `Events` — all `IReadOnlyList<T>` views.
+
+### Single-Event Entry Strategy
+No special code path. `TotalPoints` on both `Competitor` and `Team` is `placements.Sum(p => p.PointsAwarded)`. A list with 1 entry sums to that entry's points. A list with 0 entries sums to 0. Both appear on the leaderboard correctly without any null checks or "did-not-enter" logic.
+
+### Validation Layers
+1. **TournamentManager** — user-facing guards (cap exceeded, entity not found, wrong event type, duplicate placement). Returns `(false, message)`.
+2. **Model internal methods** (`AddMember`, `AddPlacement`, `RecordPlacement`) — programming-error guards. Throw `InvalidOperationException`; should never be reached if layer 1 works correctly.
+
+### Confirmed Design Decisions
+| Decision | Rationale |
+|---|---|
+| Placement recording blocked for incomplete teams (< 5 members) | Brief mandates *exactly* 5 members per team. `Team.IsComplete` must be `true` before a team result is meaningful. Intentional — no change required. |
+| Team members excluded from individual leaderboard | Team members score through their team's placements only. Prevents double-counting on both leaderboards. |
+| Duplicate placement returns `(false, message)` not exception | User error, not programming error. UI layer handles the message without try/catch. |
 
 ---
 

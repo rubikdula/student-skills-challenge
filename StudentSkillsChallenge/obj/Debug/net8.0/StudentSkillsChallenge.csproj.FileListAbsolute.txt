@@ -12,3 +12,4 @@ C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\re
 C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.pdb
 C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.genruntimeconfig.cache
 C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\ref\StudentSkillsChallenge.dll
+C:\programim\student-skills-challenge\StudentSkillsChallenge\obj\Debug\net8.0\StudentSkillsChallenge.sourcelink.json
